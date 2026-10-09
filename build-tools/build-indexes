@@ -14,7 +14,7 @@ if (!fs.existsSync('caches/pokemon-showdown')) {
 		console.error('Missing caches/pokemon-showdown. Check out the server before using --no-update.');
 		process.exit(1);
 	}
-	child_process.execSync('git clone https://github.com/smogon/pokemon-showdown.git', {
+	child_process.execSync('git clone https://github.com/AshBurn66/axbox-pokemon-showdown.git pokemon-showdown', {
 		cwd: 'caches',
 	});
 }
@@ -45,6 +45,38 @@ function requireNoCache(pathSpec) {
 	delete require.cache[require.resolve(pathSpec)];
 	return require(pathSpec);
 }
+
+
+
+/*********************
+ * Patch
+ *********************/
+
+const FAKEMON_MOD = '_myfakemons';   // <-- set this to your mod's folder name
+
+function loadModTable(file, exportName) {
+	try {
+		return requireNoCache(`../caches/pokemon-showdown/dist/data/mods/${FAKEMON_MOD}/${file}.js`)[exportName] || {};
+	} catch (e) {
+		if (e.code === 'MODULE_NOT_FOUND') return {};
+		throw e;
+	}
+}
+
+function addModEntries(table, file, exportName) {
+	const modTable = loadModTable(file, exportName);
+	for (const id in modTable) {
+		if (!(id in table)) table[id] = modTable[id];
+	}
+	return table;
+}
+
+addModEntries(Dex.data.Pokedex, 'pokedex', 'Pokedex');
+addModEntries(Dex.data.Learnsets, 'learnsets', 'Learnsets');
+addModEntries(Dex.data.FormatsData, 'formats-data', 'FormatsData');
+addModEntries(Dex.data.Moves, 'moves', 'Moves');
+addModEntries(Dex.data.Abilities, 'abilities', 'Abilities');
+addModEntries(Dex.data.Items, 'items', 'Items');
 
 /*********************************************************
  * Build search-index.js
@@ -1381,7 +1413,7 @@ console.log("DONE");
 process.stdout.write("Building `data/pokedex.js`... ");
 
 {
-	const Pokedex = requireNoCache('../caches/pokemon-showdown/dist/data/pokedex.js').Pokedex;
+	const Pokedex = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/pokedex.js').Pokedex, 'pokedex', 'Pokedex');
 	for (const id in Pokedex) {
 		const entry = Pokedex[id];
 		if (Dex.data.FormatsData[id]) {
@@ -1406,7 +1438,7 @@ console.log("DONE");
 process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.js`...");
 
 {
-	const Moves = requireNoCache('../caches/pokemon-showdown/dist/data/moves.js').Moves;
+	const Moves = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/moves.js').Moves, 'moves', 'Moves');
 	for (const id in Moves) {
 		const move = Dex.moves.get(Moves[id].name);
 		if (move.basePowerCallback) Moves[id].basePowerCallback = true;
@@ -1421,7 +1453,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const Items = requireNoCache('../caches/pokemon-showdown/dist/data/items.js').Items;
+	const Items = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/items.js').Items, 'items', 'Items');
 	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/items.js', buf);
 }
@@ -1431,7 +1463,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const Abilities = requireNoCache('../caches/pokemon-showdown/dist/data/abilities.js').Abilities;
+	const Abilities = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/abilities.js').Abilities, 'abilities', 'Abilities');
 	const buf = 'exports.BattleAbilities = ' + es3stringify(Abilities) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/abilities.js', buf);
 }
@@ -1461,7 +1493,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const FormatsData = requireNoCache('../caches/pokemon-showdown/dist/data/formats-data.js').FormatsData;
+	const FormatsData = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/formats-data.js').FormatsData, 'formats-data', 'FormatsData');
 	const buf = 'exports.BattleFormatsData = ' + es3stringify(FormatsData) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/formats-data.js', buf);
 }
@@ -1481,7 +1513,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	const Learnsets = requireNoCache('../caches/pokemon-showdown/dist/data/learnsets.js').Learnsets;
+	const Learnsets = addModEntries(requireNoCache('../caches/pokemon-showdown/dist/data/learnsets.js').Learnsets, 'learnsets', 'Learnsets');
 	const buf = 'exports.BattleLearnsets = ' + es3stringify(Learnsets) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/learnsets.js', buf);
 	fs.writeFileSync('play.pokemonshowdown.com/data/learnsets.json', JSON.stringify(Learnsets));
