@@ -1229,6 +1229,11 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				});
 			}
 		} else if (format === 'ou') tierSet = tierSet.slice(slices.OU);
+		else if (format === 'axboxformat') {
+			// AxMons section (first in the list), then OU and everything below. Skips AG/Uber.
+			const afterAxMons = tierSet.findIndex(([type], i) => i > 0 && type === 'header');
+			tierSet = tierSet.slice(0, afterAxMons).concat(tierSet.slice(slices.OU));
+		}
 		else if (format === 'uubl') tierSet = tierSet.slice(slices.UUBL);
 		else if (format === 'uu') tierSet = tierSet.slice(slices.UU);
 		else if (format === 'ru') tierSet = tierSet.slice(slices.RU || slices.UU);
