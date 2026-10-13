@@ -1235,12 +1235,19 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				});
 			}
 		} else if (format === 'ou') tierSet = tierSet.slice(slices.OU);
+<<<<<<< HEAD
 		else if (CUSTOM_FORMAT_TIERS[format]) {
 			const ownTier = CUSTOM_FORMAT_TIERS[format];
 			const start = tierSet.findIndex(([type, name]) => type === 'header' && name === ownTier);
 			const next = tierSet.findIndex(([type], i) => i > start && type === 'header');
 			//tierSet = (start < 0 ? [] : tierSet.slice(start, next)).concat(tierSet.slice(slices.OU));
 			tierSet = (start < 0 ? [] : tierSet.slice(start, next)).concat(CUSTOM_OWN_TIER_ONLY.includes(format) ? [] : tierSet.slice(slices.OU));
+=======
+		else if (format === 'axboxformat') {
+			// AxMons section (first in the list), then OU and everything below. Skips AG/Uber.
+			const afterAxMons = tierSet.findIndex(([type], i) => i > 0 && type === 'header');
+			tierSet = tierSet.slice(0, afterAxMons).concat(tierSet.slice(slices.OU));
+>>>>>>> 1ad7a30bcd110dca97035869831bcb7f4991170d
 		}
 		else if (format === 'uubl') tierSet = tierSet.slice(slices.UUBL);
 		else if (format === 'uu') tierSet = tierSet.slice(slices.UU);
