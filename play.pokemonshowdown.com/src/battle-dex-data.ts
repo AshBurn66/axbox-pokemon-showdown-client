@@ -16,6 +16,13 @@
 
 import { Dex, toID } from "./battle-dex";
 
+// export const CUSTOM_SPRITES: { [spriteid: string]: { w: number, h: number } } = {
+// 	fakemon: { w: 96, h: 96 },
+// 	dartmonkeytop: { w: 96, h: 96 },
+// 	dartmonkeymiddle: { w: 96, h: 96 },
+// 	dartmonkeybottom: { w: 96, h: 96 },
+// };
+
 /**
  * String that contains only lowercase alphanumeric characters.
  */
@@ -42,7 +49,8 @@ export interface FormatData {
 	effectType: 'Format';
 }
 
-export class Format implements FormatData {
+// note: can't be called "Format" because it conflicts with some ad code
+export class BattleFormat implements FormatData {
 	id: ID;
 	name: string;
 	readonly effectType = 'Format';
@@ -1783,5 +1791,5 @@ if (typeof require === 'function') {
 	global.Ability = Ability;
 	global.Item = Item;
 	global.Move = Move;
-	global.Format = Format;
+	global.BattleFormat = BattleFormat;
 }

@@ -647,6 +647,12 @@ export class DexSearch {
 	}
 }
 
+const CUSTOM_FORMAT_TIERS: { [format: string]: string } = {
+	axboxformat: 'AxMons',
+	bloonsmon: 'Bloons',
+};
+const CUSTOM_OWN_TIER_ONLY = ['bloonsmon'];
+
 abstract class BattleTypedSearch<T extends SearchType> {
 	searchType: T;
 	/**
@@ -1229,6 +1235,13 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 				});
 			}
 		} else if (format === 'ou') tierSet = tierSet.slice(slices.OU);
+		else if (CUSTOM_FORMAT_TIERS[format]) {
+			const ownTier = CUSTOM_FORMAT_TIERS[format];
+			const start = tierSet.findIndex(([type, name]) => type === 'header' && name === ownTier);
+			const next = tierSet.findIndex(([type], i) => i > start && type === 'header');
+			//tierSet = (start < 0 ? [] : tierSet.slice(start, next)).concat(tierSet.slice(slices.OU));
+			tierSet = (start < 0 ? [] : tierSet.slice(start, next)).concat(CUSTOM_OWN_TIER_ONLY.includes(format) ? [] : tierSet.slice(slices.OU));
+		}
 		else if (format === 'uubl') tierSet = tierSet.slice(slices.UUBL);
 		else if (format === 'uu') tierSet = tierSet.slice(slices.UU);
 		else if (format === 'ru') tierSet = tierSet.slice(slices.RU || slices.UU);
@@ -1919,7 +1932,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					) {
 						continue;
 					}
-					if (!this.formatType?.includes('natdex') && move.isNonstandard === "Past") {
+					if (!this.formatType?.includes('natdex') && !CUSTOM_FORMAT_TIERS[format] && move.isNonstandard === "Past") {
 						continue;
 					}
 					if (

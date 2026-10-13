@@ -21,12 +21,20 @@
 import { Pokemon, type ServerPokemon } from "./battle";
 import {
 	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
-	Ability, Item, Move, Species, PureEffect, Format, type FormatData, type ID, type NatureEffect, type Type,
+	Ability, Item, Move, Species, PureEffect, BattleFormat, type FormatData, type ID, type NatureEffect, type Type,
 } from "./battle-dex-data";
 import type * as DexData from "./battle-dex-data";
 import type { Teams } from "./battle-teams";
 import { Config } from "./client-main";
 import { BattleLog } from "./battle-log";
+
+// import { CUSTOM_SPRITES } from "./custom-sprites";
+const CUSTOM_SPRITES: { [spriteid: string]: { w: number, h: number } } = {
+	fakemon: { w: 96, h: 96 },
+	'dartmonkey-top': { w: 96, h: 96 },
+	'dartmonkey-middle': { w: 96, h: 96 },
+	'dartmonkey-bottom': { w: 96, h: 96 },
+};
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -34,7 +42,7 @@ export declare namespace Dex {
 	export type Item = DexData.Item;
 	export type Move = DexData.Move;
 	export type Species = DexData.Species;
-	export type Format = DexData.Format;
+	export type Format = DexData.BattleFormat;
 	export type Type = DexData.Type;
 	export type Nature = DexData.Nature;
 	export type PureEffect = DexData.PureEffect;
@@ -482,6 +490,9 @@ export const Dex = new class implements ModdedDex {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
 		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
+
+		//if (document.location.protocol === 'file:') prefix = 'http:';
+		//return prefix + '//play.pokemonshowdown.com/'; // this is the prefix it uses to fetch resources, like sprites
 	})();
 
 	fxPrefix = (() => {
@@ -515,20 +526,20 @@ export const Dex = new class implements ModdedDex {
 		return this.mod(`gen${gen}` as ID);
 	}
 	formats = {
-		cache: Object.create(null) as { [id: string]: Format },
-		get(name: string): Format {
+		cache: Object.create(null) as { [id: string]: BattleFormat },
+		get(name: string): BattleFormat {
 			const id = toID(name);
-			this.cache[id] ||= new Format(name, window.BattleFormats?.[id]);
+			this.cache[id] ||= new BattleFormat(name, window.BattleFormats?.[id]);
 			return this.cache[id];
 		},
-		load(data: { [id: string]: FormatData }): { [id: string]: Format } {
+		load(data: { [id: string]: FormatData }): { [id: string]: BattleFormat } {
 			// Update in-place so retained references get updated too
 			for (const id in this.cache) {
-				Object.assign(this.cache[id], new Format(this.cache[id].name, data[id]));
+				Object.assign(this.cache[id], new BattleFormat(this.cache[id].name, data[id]));
 			}
-			const formats: { [id: string]: Format } = {};
+			const formats: { [id: string]: BattleFormat } = {};
 			for (const id in data) {
-				const format = this.cache[id] ||= new Format(data[id].name, data[id]);
+				const format = this.cache[id] ||= new BattleFormat(data[id].name, data[id]);
 				formats[id] = format;
 			}
 			return formats;
@@ -925,6 +936,12 @@ export const Dex = new class implements ModdedDex {
 		const species = Dex.species.get(pokemon);
 		// Gmax sprites are already extremely large, so we don't need to double.
 		if (species.name.endsWith('-Gmax')) isDynamax = false;
+
+		// let spritePrefix: string = Dex.resourcePrefix;
+		// if(this.mod.name === "bloonsmon"){
+		// 	spritePrefix = "";
+		// }
+
 		let spriteData = {
 			gen: mechanicsGen,
 			w: 96,
@@ -1057,6 +1074,13 @@ export const Dex = new class implements ModdedDex {
 			spriteData.url += dir + '/' + name + '.png';
 		}
 
+		const customSprite = CUSTOM_SPRITES[species.spriteid];
+		if (customSprite) {
+			spriteData.url = `custom-sprites/${species.spriteid}${isFront ? '' : '-back'}.png`;
+			spriteData.w = customSprite.w;
+			spriteData.h = customSprite.h;
+		}
+
 		if (!options.noScale) {
 			if (graphicsGen > 4) {
 				// no scaling
@@ -1157,6 +1181,9 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 		if (species.exists === false) return { spriteDir: 'sprites/gen5', spriteid: '0', x: 10, y: 5, pixelated: true };
+
+		if (CUSTOM_SPRITES[spriteid]) return { spriteid, spriteDir: 'custom-sprites', x: 0, y: 0, pixelated: true };
+
 		if (Dex.afdMode) {
 			return {
 				spriteid,
@@ -1224,7 +1251,10 @@ export const Dex = new class implements ModdedDex {
 		const data = this.getTeambuilderSpriteData(pokemon, dex);
 		const shiny = (data.shiny ? '-shiny' : '');
 		const resize = (data.h ? `background-size:${data.h}px` : '');
-		return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
+
+		const prefix = data.spriteDir === 'custom-sprites' ? '' : Dex.resourcePrefix;
+		return `background-image:url(${prefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
+		//return `background-image:url(${Dex.resourcePrefix}${data.spriteDir}${shiny}/${data.spriteid}.png);background-position:${data.x + xOffset}px ${data.y + yOffset}px;background-repeat:no-repeat;${resize}`;
 	}
 
 	getItemIcon(item: any) {
