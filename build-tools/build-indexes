@@ -81,6 +81,8 @@ addModEntries(Dex.data.Moves, 'moves', 'Moves');
 addModEntries(Dex.data.Abilities, 'abilities', 'Abilities');
 addModEntries(Dex.data.Items, 'items', 'Items');
 
+Object.assign(Dex.data.TypeChart, loadModTable('typechart', 'TypeChart'));
+
 /*********************************************************
  * Build search-index.js
  *********************************************************/

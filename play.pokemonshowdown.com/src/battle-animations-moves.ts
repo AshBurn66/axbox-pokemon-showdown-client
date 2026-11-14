@@ -38511,6 +38511,7 @@ BattleMoveAnims['extrasensory'] = { anim: BattleMoveAnims['psychic'].anim };
 BattleMoveAnims['confusion'] = { anim: BattleMoveAnims['psychic'].anim };
 BattleMoveAnims['miracleeye'] = { anim: BattleMoveAnims['mindreader'].anim };
 BattleMoveAnims['futuresight'] = { anim: BattleMoveAnims['doomdesire'].anim };
+BattleMoveAnims['stickybomb'] = { anim: BattleMoveAnims['doomdesire'].anim };
 
 BattleMoveAnims['glare'] = { anim: BattleMoveAnims['meanlook'].anim };
 BattleMoveAnims['grudge'] = { anim: BattleMoveAnims['meanlook'].anim };

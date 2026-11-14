@@ -750,6 +750,9 @@ export class Side {
 		case 'futuresight':
 			this.sideConditions[condition] = ['Future Sight', 1, 3, 0];
 			break;
+		case 'stickybomb':
+			this.sideConditions[condition] = ['Sticky Bomb', 1, 3, 0];
+			break;
 		case 'doomdesire':
 			this.sideConditions[condition] = ['Doom Desire', 1, 3, 0];
 			break;
@@ -2809,13 +2812,17 @@ export class Battle {
 				poke.side.addSideCondition(effect, false);
 				this.scene.updateWeather();
 				break;
+			case 'stickybomb':
+				poke.side.addSideCondition(effect, false);
+				this.scene.updateWeather();
+				break;
 			case 'doomdesire':
 				poke.side.addSideCondition(effect, false);
 				this.scene.updateWeather();
 				break;
 			}
 			if (!(effect.id === 'typechange' && poke.terastallized) &&
-				effect.id !== 'futuresight' && effect.id !== 'doomdesire') {
+				effect.id !== 'futuresight' && effect.id !== 'doomdesire' && effect.id !== 'stickybomb') {
 				poke.addVolatile(effect.id);
 			}
 			this.scene.updateStatbar(poke);
@@ -2920,6 +2927,11 @@ export class Battle {
 						if (effect.name === 'Future Sight') {
 							this.scene.runOtherAnim('futuresighthit' as ID, [poke]);
 							poke.side.foe.removeSideCondition('Future Sight');
+							this.scene.updateWeather();
+						}
+						if (effect.name === 'Sticky Bomb') {
+							this.scene.runOtherAnim('doomdesirehit' as ID, [poke]);
+							poke.side.foe.removeSideCondition('Sticky Bomb');
 							this.scene.updateWeather();
 						}
 					}
@@ -3150,6 +3162,7 @@ export class Battle {
 			case 'mist':
 			case 'futuresight':
 			case 'doomdesire':
+			case 'stickybomb':
 			case 'gmaxwildfire':
 			case 'gmaxvolcalith':
 			case 'gmaxvinelash':

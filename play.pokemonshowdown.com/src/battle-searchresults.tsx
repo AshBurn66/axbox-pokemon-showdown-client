@@ -126,6 +126,9 @@ export class PSSearchResults extends preact.Component<{
 			)}</span>`;
 		if (errorMessage) return `${buf}${errorMessage}</a></li>`;
 
+		// buf += `<span class="col typecol">${pokemon.types.map(type =>
+		// 	`<img src="${Dex.resourcePrefix}sprites/types/${type}.png" alt="${escapeHTML(TL.type[type] || type)}" height="14" width="32" class="pixelated" />`
+		// ).join('')}</span>`;
 		buf += `<span class="col typecol">${pokemon.types.map(type =>
 			`<img src="${Dex.resourcePrefix}sprites/types/${type}.png" alt="${escapeHTML(TL.type[type] || type)}" height="14" width="32" class="pixelated" />`
 		).join('')}</span>`;

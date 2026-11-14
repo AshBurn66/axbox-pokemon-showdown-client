@@ -30,10 +30,27 @@ import { BattleLog } from "./battle-log";
 
 // import { CUSTOM_SPRITES } from "./custom-sprites";
 const CUSTOM_SPRITES: { [spriteid: string]: { w: number, h: number } } = {
-	fakemon: { w: 96, h: 96 },
-	'dartmonkey-top': { w: 96, h: 96 },
-	'dartmonkey-middle': { w: 96, h: 96 },
-	'dartmonkey-bottom': { w: 96, h: 96 },
+	ultrajuggernaut: { w: 96, h: 96 },
+	plasmamonkeyfc: { w: 96, h: 96 },
+	crossbowmaster: { w: 96, h: 96 },
+	infernoring: { w: 96, h: 96 },
+	supermaelstrom: { w: 96, h: 96 },
+	thetackzone: { w: 96, h: 96 },
+	glaivelord: { w: 96, h: 96 },
+	permacharge: { w: 96, h: 96 },
+	moabdomination: { w: 96, h: 96 },
+	blooncrush: { w: 96, h: 96 },
+	moabeliminator: { w: 96, h: 96 },
+	bombblitz: { w: 96, h: 96 },
+	thebloonsolver: { w: 96, h: 96 },
+	gluestorm: { w: 96, h: 96 },
+	superglue: { w: 96, h: 96 },
+	theblazingsun: { w: 96, h: 96 },
+	goldenjustice: { w: 96, h: 96 },
+	thedesertphantom: { w: 96, h: 96 },
+	superbrittle: { w: 96, h: 96 },
+	absolutezero: { w: 96, h: 96 },
+	icicleimpale: { w: 96, h: 96 },
 };
 
 export declare namespace Dex {
@@ -1164,6 +1181,12 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
+
+		const iconSpriteid = Dex.species.get(id).spriteid;
+		if (CUSTOM_SPRITES[iconSpriteid]) {
+			return `background:transparent url(custom-sprites/${iconSpriteid}-icon.png) no-repeat scroll 0px 0px${fainted}`;
+		}
+
 		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v22) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
