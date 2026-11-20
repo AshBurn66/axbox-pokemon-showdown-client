@@ -869,7 +869,7 @@ export class BattleTooltips {
 
 		for (const possibleTarget of foeActive) {
 			if (!possibleTarget) continue;
-			const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget);
+			const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget, serverPokemon);
 			const target = BattleLog.escapeHTML(this.getNickname(possibleTarget));
 			if (effectiveness === null) {
 				// do nothing
@@ -1966,7 +1966,7 @@ export class BattleTooltips {
 		return factor;
 	}
 	getMoveEffectiveness(
-		source: Pokemon, move: Dex.Move, attackType: Dex.TypeName, category: Dex.CategoryName, target: Pokemon
+		source: Pokemon, move: Dex.Move, attackType: Dex.TypeName, category: Dex.CategoryName, target: Pokemon, serverSource?: ServerPokemon
 	): number | null {
 		if (([
 			'adjacentAlly', 'adjacentAllyOrSelf', 'self', 'allySide', 'foeSide', 'all',
@@ -1976,7 +1976,7 @@ export class BattleTooltips {
 		const hardcoreMode = this.battle.hardcoreMode;
 		const inverse = this.battle.rules['Inverse Mod'];
 		const targetTypes = target.getTypeList();
-		const sourceAbility = source.effectiveAbility();
+		const sourceAbility = source.effectiveAbility(serverSource);
 		// Mold Breaker doesn't ignore _everything_, but it sure ignores everything that affects effectiveness
 		const targetAbility = hardcoreMode || [
 			'Mold Breaker', 'Teravolt', 'Turboblaze',
@@ -2031,8 +2031,14 @@ export class BattleTooltips {
 
 			// regular type effectiveness
 			if (tType.damageTaken?.[attackType] === Dex.IMMUNE) {
+				console.log('ability:', sourceAbility);
+
 				if (target.item === 'Ring Target') continue;
 				if (targetType === 'Ghost' && (sourceAbility === "Scrappy" || sourceAbility === "Mind's Eye")) continue;
+				if (targetType === 'Steel' && sourceAbility === "High Acidity"){
+					factor *= 2;
+					continue;
+				}
 				if (targetType === 'Ghost' && (target.volatiles['foresight'] || target.volatiles['odorsleuth'])) continue;
 				if (targetType === 'Dark' && (target.volatiles['miracleeye'])) continue;
 				if (targetType === 'Flying' && target.isGrounded()) continue;
@@ -2152,7 +2158,7 @@ export class BattleTooltips {
 			let tags = '';
 			for (const possibleTarget of foeActive) {
 				if (!possibleTarget) continue;
-				const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget);
+				const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget, value.serverPokemon);
 
 				if (effectiveness === null) {
 					break;
@@ -2177,7 +2183,7 @@ export class BattleTooltips {
 		let tags = '\u00D7';
 		for (const possibleTarget of foeActive) {
 			if (!possibleTarget) continue;
-			const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget);
+			const effectiveness = this.getMoveEffectiveness(pokemon, move, moveType, category, possibleTarget, value.serverPokemon);
 			if (effectiveness !== 0) {
 				tags = '';
 				break;
@@ -2557,6 +2563,11 @@ export class BattleTooltips {
 		// Other ability boosts
 		if (pokemon.status === 'brn' && move.category === 'Special') {
 			value.abilityModify(1.5, "Flare Boost");
+		}
+		if (move.flags['bullet']) {
+			value.abilityModify(1.2, 'Firearms Expert');
+			value.abilityModify(1.3, 'Explosive');
+			value.abilityModify(1.5, 'Nuclear');
 		}
 		if (move.flags['punch']) {
 			value.abilityModify(1.2, 'Iron Fist');
